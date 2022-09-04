@@ -1,0 +1,14 @@
+version: "3.3"
+
+services:
+  app:
+    build: ./filestorage
+    restart: on-failure
+    volumes:
+      - .m2:/root/.m2
+    stdin_open: true
+    tty: true
+    ports:
+      - 8080:8080
+volumes:
+  db:
