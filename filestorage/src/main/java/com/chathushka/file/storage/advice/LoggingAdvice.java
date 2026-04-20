@@ -1,18 +1,17 @@
 package com.chathushka.file.storage.advice;
 
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-
-@Slf4j
 @Component
 @Aspect
 public class LoggingAdvice {
+  private static final Logger log = LoggerFactory.getLogger(LoggingAdvice.class);
 
   /** Pointcut for services and Web REST endpoints. */
   @Pointcut(
@@ -29,29 +28,30 @@ public class LoggingAdvice {
    */
   @Around("springBeanPointcut()")
   public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+    long start = System.nanoTime();
     if (log.isDebugEnabled()) {
       log.debug(
-          "Enter: {}.{}() with argument[s] = {}",
+          "Enter: {}.{}()",
           joinPoint.getSignature().getDeclaringTypeName(),
-          joinPoint.getSignature().getName(),
-          Arrays.toString(joinPoint.getArgs()));
+          joinPoint.getSignature().getName());
     }
     try {
       Object result = joinPoint.proceed();
       if (log.isDebugEnabled()) {
+        long elapsedMs = (System.nanoTime() - start) / 1_000_000;
         log.debug(
-            "Exit: {}.{}() with result = {}",
+            "Exit: {}.{}() in {}ms",
             joinPoint.getSignature().getDeclaringTypeName(),
             joinPoint.getSignature().getName(),
-            result);
+            elapsedMs);
       }
       return result;
-    } catch (IllegalArgumentException e) {
+    } catch (RuntimeException e) {
       log.error(
-          "Illegal argument: {} in {}.{}()",
-          Arrays.toString(joinPoint.getArgs()),
+          "Error in {}.{}()",
           joinPoint.getSignature().getDeclaringTypeName(),
-          joinPoint.getSignature().getName());
+          joinPoint.getSignature().getName(),
+          e);
       throw e;
     }
   }

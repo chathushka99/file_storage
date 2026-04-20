@@ -5,7 +5,6 @@ import com.chathushka.file.storage.entity.FileEntity;
 import com.chathushka.file.storage.exception.ApiException;
 import com.chathushka.file.storage.repository.FileRepository;
 import com.chathushka.file.storage.mapper.FileMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,10 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,14 +32,7 @@ class FileStorageServiceTest {
 
   @Mock private FileRepository fileRepository;
   @Mock private FileMapper fileMapper;
-  @Mock private MockHttpServletRequest mockRequest;
   @InjectMocks private FileStorageService fileStorageService;
-
-  @BeforeEach
-  public void init() {
-    mockRequest.setContextPath("localhost:8080");
-    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
-  }
 
   @Test
   void saveFile_all_ok() {
@@ -58,7 +47,7 @@ class FileStorageServiceTest {
     fileDto.setLocation("/v1/files/unit-test-id");
     when(fileRepository.save(any(FileEntity.class))).thenReturn(file);
     MockMultipartFile fileFile =
-        new MockMultipartFile("video_file", "video_file.mp4", "video/mp4", new byte[120]);
+        new MockMultipartFile("video_file", "video_file.mp4", "video/mp4", mp4Bytes());
     // execute test method
     FileDto created = fileStorageService.saveFile(fileFile);
     // verify results
@@ -70,7 +59,7 @@ class FileStorageServiceTest {
   void saveFile_file_already_exist() {
     // prepare test data
     MockMultipartFile fileFile =
-            new MockMultipartFile("video_file", "video_file.mp4", "video/mp4", new byte[120]);
+            new MockMultipartFile("video_file", "video_file.mp4", "video/mp4", mp4Bytes());
     doThrow(new DataIntegrityViolationException("File Exist")).when(fileRepository).save(any(FileEntity.class));
     // execute test method
     ApiException apiException =
@@ -132,39 +121,40 @@ class FileStorageServiceTest {
   @Test
   void getAllFiles_ALL_OK() {
     // prepare test data
-    List<FileEntity> files = new ArrayList();
+    List<FileEntity> files = new ArrayList<>();
     FileEntity file = new FileEntity();
     file.setCreatedAt(LocalDateTime.now().minusDays(1));
     file.setFileName("video_file_ut");
     file.setFileId("unit-test-1");
     file.setFileSize(123);
     files.add(file);
-    List<FileDto> fileDtos = new ArrayList();
+    List<FileDto> fileDtos = new ArrayList<>();
     FileDto fileDto = new FileDto();
     fileDto.setFileName("video_file_ut");
     fileDto.setFileId("unit-test-1");
     fileDtos.add(fileDto);
-    when(fileRepository.findAll(any(Sort.class))).thenReturn(files);
+    Page<FileEntity> fileEntityPage = new PageImpl<>(files);
+    when(fileRepository.findAll(any(PageRequest.class))).thenReturn(fileEntityPage);
     when(fileMapper.fileEntityListToFileDtoList(anyList())).thenReturn(fileDtos);
     // execute test method
-    List<FileDto> actual = fileStorageService.getAllFiles(null, 1);
+    List<FileDto> actual = fileStorageService.getAllFiles(null, null);
     // verify
     assertEquals("video_file_ut", actual.get(0).getFileName());
-    verify(fileRepository).findAll(any(Sort.class));
+    verify(fileRepository).findAll(any(PageRequest.class));
     verify(fileMapper).fileEntityListToFileDtoList(anyList());
   }
 
   @Test
   void getAllFiles_ALL_OK_Pageable() {
     // prepare test data
-    List<FileEntity> files = new ArrayList();
+    List<FileEntity> files = new ArrayList<>();
     FileEntity file = new FileEntity();
     file.setCreatedAt(LocalDateTime.now().minusDays(1));
     file.setFileName("video_file_ut");
     file.setFileId("unit-test-1");
     file.setFileSize(123);
     files.add(file);
-    List<FileDto> fileDtos = new ArrayList();
+    List<FileDto> fileDtos = new ArrayList<>();
     FileDto fileDto = new FileDto();
     fileDto.setFileName("video_file_ut");
     fileDto.setFileId("unit-test-1");
@@ -181,4 +171,14 @@ class FileStorageServiceTest {
     verify(fileMapper).fileEntityListToFileDtoList(anyList());
   }
 
+  @Test
+  void getAllFiles_OnlyPageProvided_Throws() {
+    ApiException apiException =
+        assertThrows(ApiException.class, () -> fileStorageService.getAllFiles(0, null));
+    assertEquals("FSA008", apiException.getErrorCode());
+  }
+
+  private byte[] mp4Bytes() {
+    return new byte[] {0, 0, 0, 24, 'f', 't', 'y', 'p', 'i', 's', 'o', 'm'};
+  }
 }

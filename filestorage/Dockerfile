@@ -1,7 +1,16 @@
-FROM maven:3-jdk-11
+FROM maven:3.9.9-eclipse-temurin-11 AS build
+WORKDIR /workspace
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw mvnw
+COPY mvnw.cmd mvnw.cmd
+RUN chmod +x mvnw
+RUN ./mvnw -q -DskipTests dependency:go-offline
+COPY src src
+RUN ./mvnw -q -DskipTests clean package
 
-WORKDIR /filestorage
-COPY . .
-RUN mvn clean install
-
-CMD mvn spring-boot:run
+FROM eclipse-temurin:11-jre
+WORKDIR /app
+COPY --from=build /workspace/target/filestorage-1.0.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app/app.jar"]
