@@ -9,6 +9,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface FileMapper {
 
-  @Mapping(target = "size", constant = "fileSize")
+  @Mapping(target = "size", source = "fileSize")
+  FileDto fileEntityToFileDto(FileEntity fileEntity);
+
+  @Mapping(target = "size", source = "fileSize")
   List<FileDto> fileEntityListToFileDtoList(List<FileEntity> fileEntityList);
 }

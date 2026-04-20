@@ -1,12 +1,8 @@
 package com.chathushka.file.storage.enums;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /** API error codes */
-@Getter
-@AllArgsConstructor
 public enum ExceptionCode {
   UNHANDLED_SERVER_EXCEPTION(
       "FSA000",
@@ -26,4 +22,22 @@ public enum ExceptionCode {
   private final String errorCode;
   private final String errorDescription;
   private final HttpStatus httpStatus;
+
+  ExceptionCode(String errorCode, String errorDescription, HttpStatus httpStatus) {
+    this.errorCode = errorCode;
+    this.errorDescription = errorDescription;
+    this.httpStatus = httpStatus;
+  }
+
+  public String getErrorCode() {
+    return errorCode;
+  }
+
+  public String getErrorDescription() {
+    return errorDescription;
+  }
+
+  public HttpStatus getHttpStatus() {
+    return httpStatus;
+  }
 }

@@ -5,10 +5,6 @@ services:
     build: ./filestorage
     restart: on-failure
     volumes:
-      - .m2:/root/.m2
-    stdin_open: true
-    tty: true
+      - ./.m2:/root/.m2
     ports:
       - 8080:8080
-volumes:
-  db:

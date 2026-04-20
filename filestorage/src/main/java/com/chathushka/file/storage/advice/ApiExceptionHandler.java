@@ -4,7 +4,8 @@ import com.chathushka.file.storage.contant.Constant;
 import com.chathushka.file.storage.enums.ExceptionCode;
 import com.chathushka.file.storage.exception.ApiException;
 import com.chathushka.file.storage.dto.ApiResponse;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -17,8 +18,8 @@ import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 @RestControllerAdvice
-@Slf4j
 public class ApiExceptionHandler {
+  private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
   /**
    * Default handler for all internal server errors
@@ -57,7 +58,6 @@ public class ApiExceptionHandler {
     return ApiResponse.builder()
         .errorCode(ExceptionCode.UNSUPPORTED_HTTP_METHOD.getErrorCode())
         .title(HttpStatus.BAD_REQUEST.toString())
-        .errorCode(ExceptionCode.UNSUPPORTED_HTTP_METHOD.getErrorCode())
         .description(HttpStatus.BAD_REQUEST.getReasonPhrase())
         .errorList(List.of(errorMessage))
         .build();
@@ -87,12 +87,11 @@ public class ApiExceptionHandler {
    */
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  public ApiResponse<?> handleUnsupportedHttpMethod(ConstraintViolationException e) {
+  public ApiResponse<?> handleParameterConstraintViolation(ConstraintViolationException e) {
     var errorMessage = e.getLocalizedMessage();
     return ApiResponse.builder()
         .errorCode(ExceptionCode.PARAMETER_CONSTRAINT_VIOLATION.getErrorCode())
         .title(HttpStatus.BAD_REQUEST.toString())
-        .errorCode(ExceptionCode.PARAMETER_CONSTRAINT_VIOLATION.getErrorCode())
         .description(HttpStatus.BAD_REQUEST.getReasonPhrase())
         .errorList(List.of(errorMessage))
         .build();

@@ -86,7 +86,11 @@ class ValidatorTest {
   void validateFileTest_File_All_Ok() {
     // prepare test data
     MockMultipartFile file =
-        new MockMultipartFile("file", "file.mp4", "video/mp4", new byte[120]);
+        new MockMultipartFile(
+            "file",
+            "file.mp4",
+            "video/mp4",
+            new byte[] {0, 0, 0, 24, 'f', 't', 'y', 'p', 'i', 's', 'o', 'm'});
     // execute test method && verify
     assertDoesNotThrow(() -> validator.validateFile(file));
   }
