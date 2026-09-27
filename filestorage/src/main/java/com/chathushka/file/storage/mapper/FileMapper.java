@@ -22,6 +22,7 @@ public interface FileMapper {
      * @return mapped metadata DTO
      */
     @Mapping(target = "size", source = "fileSize")
+    @Mapping(target = "location", ignore = true)
     FileDto fileEntityToFileDto(FileEntity fileEntity);
 
     /**
@@ -31,6 +32,7 @@ public interface FileMapper {
      * @return mapped metadata DTOs
      */
     @Mapping(target = "size", source = "fileSize")
+    @Mapping(target = "location", ignore = true)
     List<FileDto> fileEntityListToFileDtoList(List<FileEntity> fileEntityList);
 
     /**
