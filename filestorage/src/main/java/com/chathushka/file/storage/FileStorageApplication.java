@@ -4,11 +4,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+/**
+ * Starts the file storage service and enables JPA audit timestamps.
+ */
 @SpringBootApplication
 @EnableJpaAuditing
-//@EnableAspectJAutoProxy
 public class FileStorageApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(FileStorageApplication.class, args);
-  }
+
+    /**
+     * Launches the Spring Boot application.
+     *
+     * @param args command-line arguments passed to the application
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(FileStorageApplication.class, args);
+    }
 }

@@ -1,9 +1,14 @@
 package com.chathushka.file.storage.advice;
 
 import com.chathushka.file.storage.contant.Constant;
+import com.chathushka.file.storage.dto.ApiResponse;
 import com.chathushka.file.storage.enums.ExceptionCode;
 import com.chathushka.file.storage.exception.ApiException;
-import com.chathushka.file.storage.dto.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,87 +18,91 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolationException;
-import java.util.List;
-
+/**
+ * Converts application and request failures into consistent API responses.
+ */
 @RestControllerAdvice
 public class ApiExceptionHandler {
-  private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-  /**
-   * Default handler for all internal server errors
-   *
-   * @param e exception
-   * @return API response for HTTP status 500
-   */
-  @ExceptionHandler(Exception.class)
-  @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-  public ApiResponse<?> handleInternalServerErrors(Exception e) {
-    var errorId = ProcessHandle.current().pid() + String.valueOf(System.currentTimeMillis());
-    log.error("Internal Server Error Occurred. Error ID: {}", errorId, e);
-    return ApiResponse.builder()
-        .title(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-        .errorCode(ExceptionCode.UNHANDLED_SERVER_EXCEPTION.getErrorCode())
-        .description(
-            ExceptionCode.UNHANDLED_SERVER_EXCEPTION
-                .getErrorDescription()
-                .replace(Constant.ERROR_ID_PLACEHOLDER, errorId))
-        .build();
-  }
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-  /**
-   * Handles HTTP Method not supported exceptions
-   *
-   * @param e exception
-   * @param request HTTP request
-   * @return API response for HTTP status 400 invalid HTTP method
-   */
-  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  public ApiResponse<?> handleUnsupportedHttpMethod(
-      HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
-    log.info("Bad request for {}", request.getRequestURI());
-    var errorMessage = e.getLocalizedMessage() + " for " + request.getRequestURI();
-    return ApiResponse.builder()
-        .errorCode(ExceptionCode.UNSUPPORTED_HTTP_METHOD.getErrorCode())
-        .title(HttpStatus.BAD_REQUEST.toString())
-        .description(HttpStatus.BAD_REQUEST.getReasonPhrase())
-        .errorList(List.of(errorMessage))
-        .build();
-  }
+    /**
+     * Handles unexpected server errors and logs an identifier for support.
+     *
+     * @param exception unexpected error
+     * @return API response with HTTP status 500
+     */
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiResponse<?> handleInternalServerErrors(Exception exception) {
+        final String errorId = ProcessHandle.current().pid() + String.valueOf(System.currentTimeMillis());
+        log.error("Internal Server Error Occurred. Error ID: {}", errorId, exception);
 
-  /**
-   * Handles user related input exception
-   *
-   * @param e exception
-   * @return API response with HTTP status 4XX
-   */
-  @ExceptionHandler(ApiException.class)
-  public ResponseEntity<ApiResponse<?>> handleApiException(ApiException e) {
-    return new ResponseEntity<>(
-        ApiResponse.builder()
-            .errorCode(e.getErrorCode())
-            .description(e.getErrorDescription())
-            .build(),
-        e.getHttpStatus());
-  }
+        final String description = // ls
+                ExceptionCode.UNHANDLED_SERVER_EXCEPTION // ls
+                        .getErrorDescription() // ls
+                        .replace(Constant.ERROR_ID_PLACEHOLDER, errorId);
+        return ApiResponse.builder() // ls
+                .title(HttpStatus.INTERNAL_SERVER_ERROR.toString()) // ls
+                .errorCode(ExceptionCode.UNHANDLED_SERVER_EXCEPTION.getErrorCode()) // ls
+                .description(description) // ls
+                .build();
+    }
 
-  /**
-   * Handles constraint violation exceptions
-   *
-   * @param e exception
-   * @return API response for HTTP status 400 invalid HTTP method
-   */
-  @ExceptionHandler(ConstraintViolationException.class)
-  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  public ApiResponse<?> handleParameterConstraintViolation(ConstraintViolationException e) {
-    var errorMessage = e.getLocalizedMessage();
-    return ApiResponse.builder()
-        .errorCode(ExceptionCode.PARAMETER_CONSTRAINT_VIOLATION.getErrorCode())
-        .title(HttpStatus.BAD_REQUEST.toString())
-        .description(HttpStatus.BAD_REQUEST.getReasonPhrase())
-        .errorList(List.of(errorMessage))
-        .build();
-  }
+    /**
+     * Handles requests that use an unsupported HTTP method.
+     *
+     * @param exception unsupported-method exception
+     * @param request   HTTP request that caused the exception
+     * @return API response with HTTP status 400
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<?> handleUnsupportedHttpMethod( // ls
+                                                       HttpRequestMethodNotSupportedException exception, HttpServletRequest request) {
+        log.info("Bad request for {}", request.getRequestURI());
+        final String errorMessage = exception.getLocalizedMessage() + " for " + request.getRequestURI();
+
+        return ApiResponse.builder() // ls
+                .errorCode(ExceptionCode.UNSUPPORTED_HTTP_METHOD.getErrorCode()) // ls
+                .title(HttpStatus.BAD_REQUEST.toString()) // ls
+                .description(HttpStatus.BAD_REQUEST.getReasonPhrase()) // ls
+                .errorList(List.of(errorMessage)) // ls
+                .build();
+    }
+
+    /**
+     * Handles expected application errors with their declared HTTP status.
+     *
+     * @param exception application error to expose
+     * @return API error response and its associated status
+     */
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiResponse<?>> handleApiException(ApiException exception) {
+        final ApiResponse<?> response = // ls
+                ApiResponse.builder() // ls
+                        .errorCode(exception.getErrorCode()) // ls
+                        .description(exception.getErrorDescription()) // ls
+                        .build();
+        return new ResponseEntity<>(response, exception.getHttpStatus());
+    }
+
+    /**
+     * Handles invalid request parameters.
+     *
+     * @param exception validation failure
+     * @return API response with HTTP status 400
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<?> handleParameterConstraintViolation(ConstraintViolationException exception) {
+        final String errorMessage = exception.getLocalizedMessage();
+
+        return ApiResponse.builder() // ls
+                .errorCode(ExceptionCode.PARAMETER_CONSTRAINT_VIOLATION.getErrorCode()) // ls
+                .title(HttpStatus.BAD_REQUEST.toString()) // ls
+                .description(HttpStatus.BAD_REQUEST.getReasonPhrase()) // ls
+                .errorList(List.of(errorMessage)) // ls
+                .build();
+    }
 }
