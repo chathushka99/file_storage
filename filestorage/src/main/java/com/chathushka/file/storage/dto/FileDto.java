@@ -5,59 +5,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents file metadata returned by the API.
+ *
+ * @param fileId    unique file identifier
+ * @param fileName  original filename
+ * @param location  relative URL for downloading the file
+ * @param size      file size in bytes
+ * @param createdAt record creation timestamp
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FileDto {
-  @JsonProperty("fileid")
-  private String fileId;
-
-  @JsonProperty("name")
-  private String fileName;
-
-  private String location;
-
-  @JsonProperty("size")
-  private Long size;
-
-  @JsonProperty("created_at")
-  private LocalDateTime createdAt;
-
-  public String getFileId() {
-    return fileId;
-  }
-
-  public void setFileId(String fileId) {
-    this.fileId = fileId;
-  }
-
-  public String getFileName() {
-    return fileName;
-  }
-
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
-  }
-
-  public String getLocation() {
-    return location;
-  }
-
-  public void setLocation(String location) {
-    this.location = location;
-  }
-
-  public Long getSize() {
-    return size;
-  }
-
-  public void setSize(Long size) {
-    this.size = size;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
+public record FileDto( // ls
+                       @JsonProperty("fileid") String fileId, // ls
+                       @JsonProperty("name") String fileName, // ls
+                       String location, // ls
+                       @JsonProperty("size") Long size, // ls
+                       @JsonProperty("created_at") LocalDateTime createdAt) {
 }
