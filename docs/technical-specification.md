@@ -7,7 +7,7 @@ The File Storage module exposes a REST API for storing and retrieving video file
 The application uses a controller, service, Spring Data JPA repository, and MapStruct mapper. File uploads are validated before the service persists entity data; controllers expose response DTOs and binary file content rather than JPA entities.
 
 ## 3. Technology Stack
-Java 21, Spring Boot 3.5, Spring MVC, Spring Data JPA, Hibernate, H2, MapStruct, springdoc-openapi, Maven, and JUnit 5.
+Java 25, Spring Boot 4.1, Spring MVC, Spring Data JPA, Hibernate, H2, MapStruct, springdoc-openapi 3.1, Maven, and JUnit Jupiter.
 
 ## 4. Data Model
 `FileEntity` stores a UUID string identifier, original filename, media type, byte size, file bytes, and creation/update timestamps. A unique constraint on filename, media type, and size prevents duplicate entries with the same metadata.

@@ -3,7 +3,7 @@
 > **File location:** `.github/copilot-instructions.md` at the repository root.
 > Copilot Chat, Copilot code review, and Copilot coding agent read this file automatically for every request made in this repository. A few Copilot integrations require a one-time setting to enable loading it - check your IDE's Copilot settings if it doesn't seem to be picked up.
 
-These rules apply to all Java code Copilot generates, edits, or reviews in this repository. Baseline stack: **Java 21 (LTS)**, **Spring Boot 3.5.x**, **Maven**, **MyBatis** for persistence on new projects (see §6.5 for the JPA conventions to use instead on an existing project already built on Spring Data JPA). Consistency with this file takes priority over a shorter or more "familiar" alternative.
+These rules apply to all Java code Copilot generates, edits, or reviews in this repository. Baseline stack: **Java 25 (LTS)**, **Spring Boot 4.1.x**, **Maven**, **MyBatis** for persistence on new projects (see §6.5 for the JPA conventions to use instead on an existing project already built on Spring Data JPA). Consistency with this file takes priority over a shorter or more "familiar" alternative.
 
 ---
 
@@ -282,14 +282,14 @@ Standard Maven layout (`src/main/java`, `src/main/resources`, `src/test/java`, `
 
     <properties>
         <!-- Core platform -->
-        <java.version>21</java.version>
-        <spring-boot.version>3.5.16</spring-boot.version>
+        <java.version>25</java.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
 
         <!-- Persistence -->
         <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
 
         <!-- API documentation -->
-        <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
+        <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
 
         <!-- Utilities -->
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -303,7 +303,7 @@ Standard Maven layout (`src/main/java`, `src/main/resources`, `src/test/java`, `
         <!-- Spring Boot starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -671,7 +671,7 @@ Copilot combines this file with `AGENTS.md` when both exist at the repo root - G
 # AGENTS.md
 
 ## Project
-Real-time collateral valuation and risk reporting service (Spring Boot, Java 21, MyBatis).
+File storage service (Spring Boot 4.1, Java 25, Spring Data JPA).
 
 ## Setup
 mvn clean install

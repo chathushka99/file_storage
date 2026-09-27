@@ -1,9 +1,9 @@
 # file_storage
-This is a file storage API for video files up to 100 MiB, persisted in an H2 database. It uses Java 21 and Spring Boot 3.5.
+This is a file storage API for video files up to 100 MiB, persisted in an H2 database. It uses Java 25 and Spring Boot 4.1.
 
 ## Run locally
 
-Install a Java 21 JDK.
+Install a Java 25 JDK.
 
 1. `chmod +x start.sh` (first time only)
 2. `./start.sh`
